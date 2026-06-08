@@ -110,11 +110,75 @@ def carregar_config() -> dict:
     if not CONFIG_PATH.exists():
         print("[engine] config.json não encontrado — iniciando em modo monitor (sem ações mapeadas).")
         return {}
+
     with open(CONFIG_PATH, "r", encoding="utf-8") as f:
-        cfg = json.load(f)
-    mapeamentos = {k: v for k, v in cfg.items() if not k.startswith("_")}
-    print(f"[engine] config.json carregado — {len(mapeamentos)} mapeamentos.")
-    return cfg
+        raw = json.load(f)
+
+    # Construímos um novo dicionário normalizado onde as chaves seguem o
+    # formato esperado pelo engine: "ESQ_<GESTO>" ou "DIR_<GESTO>" → AÇÃO
+    # Também preservamos flags globais (ex: inverter_x_rosto).
+    normalized: dict = {}
+
+    # Primeiro copie entradas que não são mappings ESQ_/DIR_ (flags, comentários)
+    for k, v in raw.items():
+        if not (isinstance(k, str) and (k.startswith("ESQ_") or k.startswith("DIR_"))):
+            normalized[k] = v
+
+    # Agora processe entradas ESQ_/DIR_
+    acoes_usadas: dict[str, str] = {}
+    for k, v in raw.items():
+        if not (isinstance(k, str) and (k.startswith("ESQ_") or k.startswith("DIR_"))):
+            continue
+
+        try:
+            prefix, suffix = k.split("_", 1)
+        except ValueError:
+            print(f"[engine] Ignorando entrada de config inválida: {k}")
+            continue
+
+        # Caso 1: formato esperado — chave = ESQ_<GESTO>, valor = AÇÃO
+        if isinstance(v, str) and v in ACOES_CONTROLE:
+            if v in acoes_usadas:
+                print(
+                    f"[engine] Conflito: a ação {v} já está mapeada em {acoes_usadas[v]}. "
+                    f"Ignorando duplicata em {k}."
+                )
+                continue
+            acoes_usadas[v] = k
+            normalized[k] = v
+            continue
+
+        # Caso 2: mapeamento invertido do usuário — chave = ESQ_<AÇÃO>, valor = GESTO
+        if suffix in ACOES_CONTROLE and isinstance(v, str):
+            gesto = v
+            acao = suffix
+            if acao in acoes_usadas:
+                print(
+                    f"[engine] Conflito: a ação {acao} já está mapeada em {acoes_usadas[acao]}. "
+                    f"Ignorando duplicata em {k}."
+                )
+                continue
+            acoes_usadas[acao] = f"{prefix}_{gesto}"
+            normalized[f"{prefix}_{gesto}"] = acao
+            continue
+
+        # Caso fallback: tente inferir pelo valor
+        if isinstance(v, str) and v in ACOES_CONTROLE:
+            if v in acoes_usadas:
+                print(
+                    f"[engine] Conflito: a ação {v} já está mapeada em {acoes_usadas[v]}. "
+                    f"Ignorando duplicata em {k}."
+                )
+                continue
+            acoes_usadas[v] = k
+            normalized[k] = v
+            continue
+
+        print(f"[engine] Ignorando config entry não reconhecida: {k}: {v}")
+
+    mappings_count = sum(1 for key in normalized.keys() if isinstance(key, str) and (key.startswith("ESQ_") or key.startswith("DIR_")))
+    print(f"[engine] config.json carregado — {mappings_count} mapeamentos.")
+    return normalized
 
 
 def ler_flag_inverter_x(config: dict) -> bool:
@@ -392,11 +456,12 @@ def main() -> None:
                     lado_camera = handedness[0].category_name
                     gesto = classificar_gesto(lm_list)
 
-                    # MediaPipe: "Right" na câmera = mão esquerda real (espelhado)
+                    # A visualização da câmera está espelhada, então trocamos
+                    # a atribuição ESQ/DIR para refletir o lado que o usuário vê.
                     if lado_camera == "Right":
-                        gesto_esq = gesto
-                    else:
                         gesto_dir = gesto
+                    else:
+                        gesto_esq = gesto
 
                     mp_drawing.draw_landmarks(
                         image=frame,
