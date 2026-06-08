@@ -80,18 +80,24 @@ Requisitos
 - PySide6
 
 Como instalar e executar no Windows
-1. Abra um terminal PowerShell na pasta do projeto.
-2. Instale as dependências:
 
-```bash
-python -m pip install -r requirements.txt
-```
+Opção 1:
+  Usar o instalador Setup_Rastreador.exe que irá realizar a instalação dos drivers dependências
+  e o executável do projeto.
 
-3. Execute a interface principal:
+Opção 2:
+  1. Abra um terminal PowerShell na pasta do projeto.
+  2. Instale as dependências:
 
-```bash
-python gui.py
-```
+  ```bash
+  python -m pip install -r requirements.txt
+  ```
+
+  3. Execute a interface principal:
+
+  ```bash
+  python gui.py
+  ```
 
 4. Na GUI, faça o mapeamento desejado, salve e clique em `Iniciar Engine`.
 5. Abra o jogo e use a câmera normalmente.
