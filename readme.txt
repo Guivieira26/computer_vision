@@ -21,6 +21,8 @@ Principais recursos
 - Calibração do centro com dupla `PINCA_INDICADOR` simultânea.
 - `config.json` personalizável, com validação de conflito de mapeamento.
 
+![Example Image](example.png)
+
 Como o mapeamento funciona
 O arquivo `config.json` define apenas a associação entre gesto e ação do controle.
 O formato esperado é:
