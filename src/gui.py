@@ -662,12 +662,26 @@ class JanelaPrincipal(QMainWindow):
             self._refresh_todos()
             self._status.showMessage("Todos os mapeamentos removidos.")
 
+    # def _iniciar(self) -> None:
+    #     self._salvar()
+    #     if not ENGINE_PATH.exists():
+    #         QMessageBox.warning(self, "Não encontrado", f"engine.py não encontrado:\n{ENGINE_PATH}")
+    #         return
+    #     subprocess.Popen([sys.executable, str(ENGINE_PATH)])
+    #     self._status.showMessage("Engine iniciado.")
+
     def _iniciar(self) -> None:
         self._salvar()
-        if not ENGINE_PATH.exists():
-            QMessageBox.warning(self, "Não encontrado", f"engine.py não encontrado:\n{ENGINE_PATH}")
-            return
-        subprocess.Popen([sys.executable, str(ENGINE_PATH)])
+        import sys, os, subprocess
+
+        # Dentro do bundle PyInstaller, sys.frozen = True
+        # O próprio .exe é relançado com --engine para rodar o engine
+        if getattr(sys, "frozen", False):
+            exe = sys.executable
+            subprocess.Popen([exe, "--engine"])
+        else:
+            # Desenvolvimento normal: chama engine.py diretamente
+            subprocess.Popen([sys.executable, str(ENGINE_PATH)])
         self._status.showMessage("Engine iniciado.")
 
 
@@ -684,4 +698,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if "--engine" in sys.argv:
+        # Modo engine: importa e roda o engine direto, sem GUI
+        from engine import main as engine_main
+        engine_main()
+    else:
+        # Modo GUI normal
+        main()

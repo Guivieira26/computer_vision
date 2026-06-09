@@ -6,6 +6,30 @@ rosto e gestos das mãos em entrada de controle virtual. A versão atual não é
 mais estática: ela possui uma GUI para configurar o mapa de gestos, salvar o
 `config.json` e iniciar o motor de execução.
 
+Como instalar e executar no Windows
+
+Opção 1:
+  Usar o instalador CVEngine_Setup_v2.2.0.exe que irá realizar a instalação dos drivers dependências
+  e o executável do projeto. Caso tente iniciar o engine e ele não funcione tente instalar o driver manualemnte em drivers/ViGEmBus_1.22.0_x64_x86_arm64.exe
+
+Opção 2:
+  1. Abra um terminal PowerShell na pasta do projeto. /src
+  2. Instale as dependências:
+
+  ```bash
+  python -m pip install -r requirements.txt
+  ```
+
+  3. Execute a interface principal:
+
+  ```bash
+  python gui.py
+  ```
+
+4. Na GUI, faça o mapeamento desejado, salve e clique em `Iniciar Engine`.
+5. Abra o jogo e use a câmera normalmente.
+
+
 O fluxo principal agora é:
 1. Abrir a interface em `gui.py`.
 2. Mapear os gestos desejados nos botões/ações da manete virtual.
@@ -78,29 +102,6 @@ Requisitos
 - MediaPipe
 - vgamepad
 - PySide6
-
-Como instalar e executar no Windows
-
-Opção 1:
-  Usar o instalador Setup_Rastreador.exe que irá realizar a instalação dos drivers dependências
-  e o executável do projeto.
-
-Opção 2:
-  1. Abra um terminal PowerShell na pasta do projeto.
-  2. Instale as dependências:
-
-  ```bash
-  python -m pip install -r requirements.txt
-  ```
-
-  3. Execute a interface principal:
-
-  ```bash
-  python gui.py
-  ```
-
-4. Na GUI, faça o mapeamento desejado, salve e clique em `Iniciar Engine`.
-5. Abra o jogo e use a câmera normalmente.
 
 Observações
 - Os modelos do MediaPipe são baixados automaticamente para `models/` na
