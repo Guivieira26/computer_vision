@@ -32,6 +32,8 @@ MANIFEST
 *.manifest
 *.spec
 *.iss
+CVEngine_Setup_v2.2.0.exe
+#ignore CVEngine_Setup_v2.2.0.exe - Já esta em releases no github, não é necessário manter no repositório
 
 # Installer logs
 pip-log.txt
